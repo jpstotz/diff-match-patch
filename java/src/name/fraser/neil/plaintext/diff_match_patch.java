@@ -19,10 +19,18 @@
 package name.fraser.neil.plaintext;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.Character;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -138,7 +146,7 @@ public class diff_match_patch {
     if (Diff_Timeout <= 0) {
       deadline = Long.MAX_VALUE;
     } else {
-      deadline = System.currentTimeMillis() + (long) (Diff_Timeout * 1000);
+      deadline = System.nanoTime() + (long) (Diff_Timeout * 1000000000l);
     }
     return diff_main(text1, text2, checklines, deadline);
   }
@@ -382,7 +390,7 @@ public class diff_match_patch {
     int k2end = 0;
     for (int d = 0; d < max_d; d++) {
       // Bail out if deadline is reached.
-      if (System.currentTimeMillis() > deadline) {
+      if (System.nanoTime() > deadline) {
         break;
       }
 
@@ -1474,13 +1482,8 @@ public class diff_match_patch {
     for (Diff aDiff : diffs) {
       switch (aDiff.operation) {
       case INSERT:
-        try {
-          text.append("+").append(URLEncoder.encode(aDiff.text, "UTF-8")
-                                            .replace('+', ' ')).append("\t");
-        } catch (UnsupportedEncodingException e) {
-          // Not likely on modern system.
-          throw new Error("This system does not support UTF-8.", e);
-        }
+        text.append("+").append(URLEncoder.encode(aDiff.text, StandardCharsets.UTF_8)
+                                          .replace('+', ' ')).append("\t");
         break;
       case DELETE:
         text.append("-").append(aDiff.text.length()).append("\t");
